@@ -1,0 +1,18 @@
+Fully Individualised Programmable Exams - FIPEs
+
+Note: This is an early-stage prototype. It needs to be invoked directly
+from the repository instead of being installed. Only one exam can
+therefore be handled per repository clone.
+
+A website with catalogue of downloadable FIPE mods is planned; currently this
+repository is the only source of information.
+
+Quickstart:
+- clone repository
+- enter the generator directory
+- fill student accounts in the file students.in
+- modify the module selection and expected scores in multigen.conf
+- run all.sh
+- enter the ../pdfgen directory
+- have a look at the four *-out folders
+- optional: proceed to the deployment folder and adjust/run scripts

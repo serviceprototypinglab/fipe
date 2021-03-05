@@ -1,0 +1,22 @@
+<html>
+	<head>
+		<title>Online exam</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	</head>
+	<body>
+
+		<h2>Online exam</h2>
+
+		<p>
+		The examination document in form of a single PDF file can be downloaded from XX.00 o'clock.
+		The examination must be conducted fully independently without the help from others. Detailed further instructions
+		are provided directly on the first page of the PDF.
+		</p>
+
+		<p>
+		Do not forget to submit on time in ..., until XX.00.
+		</p>
+
+		<p><a href="%ACCOUNT%-sep.pdf">Download document</a> (PDF)</p>
+	</body>
+</html>
