@@ -1,0 +1,117 @@
+#!/usr/bin/env python3
+
+import os
+import shutil
+import time
+import tempfile
+
+def printcolor(cat, s, col):
+    color = {}
+    color["red"] = "\033[0;31m"
+    color["yellow"] = "\033[1;33m"
+    color["blue"] = "\033[0;34m"
+    color["green"] = "\033[0;32m"
+    reset = "\033[0m"
+    if cat is None:
+        cat = ""
+    else:
+        cat = f"[{cat:10}] "
+    print(f"{color[col]}{cat}{s}{reset}")
+
+root = os.path.join(os.path.expanduser("~"), ".fipe-base")
+
+printcolor(None, "FIPE - Fully Individualised Programmable Exams", "green")
+
+if not os.path.isdir(root):
+    printcolor("init", "Codebase missing, setting up copy.", "yellow")
+    ret = os.system(f"git clone -q https://github.com/serviceprototypinglab/fipe.git {root}")
+    if ret:
+        printcolor("init", "Codebase setup failed.", "red")
+        exit(1)
+else:
+    stt = os.stat(root).st_mtime
+    if stt < time.time() - 600:
+        origdir = os.getcwd()
+        os.chdir(root)
+        ret = os.system(f"git pull -q")
+        os.system("touch .")
+        os.chdir(origdir)
+    printcolor("init", "Codebase initialised and up to date.", "green")
+
+if not os.path.isfile("students.in"):
+    printcolor("students", "You need a list of student accounts in the file 'students.in'.", "red")
+    exit(1)
+else:
+    f = open("students.in")
+    students = f.readlines()
+    printcolor("students", f"Loaded {len(students)} students.", "green")
+
+if not os.path.isfile("multigen.conf"):
+    printcolor("conf", "You need a configuration of FIPE mods in the file 'multigen.conf'. (Format: modname,title,score)", "red")
+    exit(1)
+else:
+    f = open("multigen.conf")
+    confs = f.read().splitlines()
+    printcolor("conf", f"Loaded {len(confs)} module configurations.", "green")
+    broken = False
+    for conf in confs:
+        if conf.count(",") != 2:
+            printcolor("conf", f"Invalid configuration line: '{conf}'", "red")
+            broken = True
+            break
+        else:
+            mod, title, score = conf.split(",")
+            if not os.path.isfile(os.path.join("fipemods", f"{mod}.py")):
+                printcolor("conf", f"Module not found in the local 'fipemods' folder: '{mod}'", "red")
+                broken = True
+                modbase = os.path.join(root, "generator", "fipemods", f"{mod}.py")
+                modstub = os.path.join("fipemods", f"{mod}.stub.py")
+                if os.path.isfile(modstub):
+                    printcolor("conf", f"Stub module '{modstub}' already present, needs to be edited and renamed.", "yellow")
+                elif os.path.isfile(modbase):
+                    if not os.path.isdir("fipemods"):
+                        os.mkdir("fipemods")
+                    shutil.copyfile(modbase, modstub)
+                    printcolor("conf", f"Stub module '{modstub}' fetched from codebase, needs editing and renaming.", "yellow")
+                else:
+                    printcolor("conf", "Fatal: Also not found in codebase.", "red")
+                break
+    if not broken:
+        printcolor("conf", "Prevalidation successful.", "green")
+    else:
+        exit(1)
+
+printcolor("gen", "Generating exams...", "green")
+
+td = tempfile.TemporaryDirectory(prefix="fipe").name
+shutil.copytree(root, td, dirs_exist_ok=True)
+gen = os.path.join(td, "generator")
+shutil.rmtree(os.path.join(gen, "fipemods"))
+shutil.copytree("fipemods", os.path.join(gen, "fipemods"))
+shutil.copy("students.in", gen)
+shutil.copy("multigen.conf", gen)
+
+origdir = os.getcwd()
+os.chdir(gen)
+ret = os.system("./all.sh")
+os.chdir(origdir)
+
+if os.path.isdir("generated-exam"):
+    shutil.rmtree("generated-exam")
+os.mkdir("generated-exam")
+pdfgen = os.path.join(td, "pdfgen")
+broken = False
+for gendir in ("solutions-out", "students-out"): # tasks-out, admin-out skipped
+    src = os.path.join(pdfgen, gendir)
+    if not os.path.isdir(src):
+        printcolor("gen", f"Folder '{gendir}' is missing from generator output.", "red")
+        broken = True
+        break
+    else:
+        shutil.copytree(src, os.path.join("generated-exam", gendir))
+
+if broken:
+    printcolor("gen", "The exam generation failed. Output might be incomplete or corrupted.", "red")
+    exit(1)
+else:
+    printcolor("gen", "Done. The exam is located in 'generated-exam'.", "green")
