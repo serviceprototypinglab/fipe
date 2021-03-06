@@ -109,6 +109,7 @@ for gendir in ("solutions-out", "students-out"): # tasks-out, admin-out skipped
         break
     else:
         shutil.copytree(src, os.path.join("generated-exam", gendir))
+shutil.copy(os.path.join(gen, "tasksgen", "admin", "students.out"), "generated-exam")
 
 if broken:
     printcolor("gen", "The exam generation failed. Output might be incomplete or corrupted.", "red")
