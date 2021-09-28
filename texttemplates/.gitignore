@@ -1,0 +1,9 @@
+_*
+
+*.subst.*
+results.xls
+
+#students.out
+
+generated
+autosolutions

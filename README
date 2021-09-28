@@ -10,3 +10,8 @@ Quickstart:
 - run 'fipe' and follow the instructions...
 - if stuck, check the 'example-demo' folder
 - optional: proceed to the deployment folder and adjust/run scripts
+
+Note: The 'texttemplates' folder contains an advanced text templating
+mechanism with support for variability, fingerprinting and partially
+automated scoring. It is not yet integrated but made available for
+further investigation.
